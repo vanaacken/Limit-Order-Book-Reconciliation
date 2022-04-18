@@ -66,13 +66,15 @@ pub struct BookStreamWrapper {
 #[derive(Debug, Clone, Copy)]
 pub struct Order {
     pub price: f64,
+    pub comp_price: i64,
     pub size: f64,
 }
 
 
 impl Order {
     fn new(price: f64, size: f64) -> Self {
-        Order {price, size}
+        let comp_price = (price * 10.0) as i64;
+        Order {price, comp_price, size}
     }
 }
 
