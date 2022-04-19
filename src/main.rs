@@ -10,12 +10,13 @@ use serde_json::{Value, json};
 use tungstenite::client::AutoStream;
 use tungstenite::handshake::client::Response;
 use tungstenite::{WebSocket, Message};
-use std::thread;
-use std::sync::{Arc, Mutex};
+// use std::thread;
+// use std::sync::{Arc, Mutex};
 mod models;
 use crate::models::Order;
 use crate::models::BookStreamWrapper;
 use crate::models::LimitOrderBook;
+// use crate::models::ChangeId;
 
 // use lobr::{print_map_values, price_key};
 
@@ -49,7 +50,7 @@ fn parse_json_data() -> Value {
 }
 
 fn deribit_connect() -> (WebSocket<AutoStream>, Response) {
-    let ws_url = DERIBIT_WS_API_TESTNET;
+    let ws_url = DERIBIT_WS_API;
     connect(Url::parse(ws_url).unwrap()).expect("Can't connect")
 }
 
@@ -131,10 +132,12 @@ fn resolve_deltas(mut lob: LimitOrderBook, parsed: &BookStreamWrapper) -> LimitO
     lob
 }
 
+
+
 fn main() {
 
     let mut lob = LimitOrderBook::new();
-    
+    // let mut change_id: i64;
     let mut socket: WebSocket<AutoStream>;
     (socket, _) = deribit_connect();
     socket = send_subscribe_msg(socket);
@@ -150,6 +153,12 @@ fn main() {
         //      -> renew connection
         //      -> clear lob
         // -----------------------------------
+    //     let s_type = parsed.params.data.r#type;
+    //    if let s_type.as_str() = "snapshot" {
+    //        change_id = parsed.params.data.change_id;
+    //    }
+
+
         lob = resolve_deltas(lob, &parsed);
         // TODO -----------------------------
         //  find best bid/ask

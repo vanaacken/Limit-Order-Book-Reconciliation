@@ -1,6 +1,9 @@
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use ordered_float::OrderedFloat;
+// use tungstenite::{WebSocket, Message};
+// use tungstenite::client::AutoStream;
+// use tungstenite::handshake::client::Response;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
@@ -125,18 +128,20 @@ impl LimitOrderBook {
 // }
 
 // impl ChangeId {
-//     pub fn new(id: i64, )-> Self {
-//         let prev_id = id;
+//     pub fn new()-> Self {
+//         let id = 0;
+//         let prev_id = 0;
 //         ChangeId{id, prev_id}
 //     }
-
-//     pub 
-
 // }
 
 
 
-
+// #[derive(Debug, Clone)]
+// pub struct Connection {
+//     pub socket: WebSocket<AutoStream>,
+//     pub 
+// }
 
 
 
