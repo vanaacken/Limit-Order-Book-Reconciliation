@@ -1,16 +1,17 @@
 
 use tungstenite::connect;
 use url::Url;
-use std::collections::BTreeMap;
+// use std::collections::BTreeMap;
 use serde_json::{Value, json};
 // use float_cmp::ApproxEq;
 // use float_ord::FloatOrd;
-use ordered_float::OrderedFloat;
+// use ordered_float::OrderedFloat;
 // use std::cmp::Ordering;
 use tungstenite::client::AutoStream;
 use tungstenite::handshake::client::Response;
 use tungstenite::{WebSocket, Message};
-
+use std::thread;
+use std::sync::{Arc, Mutex};
 mod models;
 use crate::models::Order;
 use crate::models::BookStreamWrapper;
@@ -130,12 +131,6 @@ fn resolve_deltas(mut lob: LimitOrderBook, parsed: &BookStreamWrapper) -> LimitO
     lob
 }
 
-
-// fn find_best_price(lob: LimitOrderBook) -> LimitOrderBook {
-
-// }
-
-
 fn main() {
 
     let mut lob = LimitOrderBook::new();
@@ -144,6 +139,9 @@ fn main() {
     (socket, _) = deribit_connect();
     socket = send_subscribe_msg(socket);
     (socket, _) = subscription_response(socket);
+    let _ = std::thread::spawn(|| {
+        
+    });
     loop {
         let parsed: BookStreamWrapper;
         (socket, parsed) = read_subscription(socket);
@@ -156,10 +154,11 @@ fn main() {
         // TODO -----------------------------
         //  find best bid/ask
         // -----------------------------------
-        println!("{}", parsed.params.data.timestamp);
+        // println!("{}", parsed.params.data.timestamp);
 
         // TODO -----------------------------
-        //  Print Prices
+        //  Print Prices 
+        //  -> per second
         // -----------------------------------
         print_lob(&lob);
     }
