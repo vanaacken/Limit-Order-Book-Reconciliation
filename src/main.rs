@@ -25,11 +25,10 @@ pub fn price_key(f_price: f64) -> i64 {
 pub fn print_map_values(map: &BTreeMap<OrderedFloat<f64>, f64>) {
     println!(
         "Map size: {}, lowest ask: --, Quantitiy: --",
-        map.len()
+        map.len(),
+        // map.into_values();
     );
 }
-
-
 
 
 fn main() {
@@ -71,17 +70,16 @@ fn main() {
             let f_quantity = parsed.params.data.asks[i].2;
             match String::from(&parsed.params.data.asks[i].0).as_str() {
                 "new" => {
-                    // ask_tree.insert(price_key(f_price), Order::new(f_price, f_quantity));
                     ask_tree.insert(OrderedFloat(f_price), f_quantity);
                 }
-                // "change" => {
-                //     if let Some(order) = ask_tree.get_mut(&price_key(f_price)) {
-                //         *order = Order::new(f_price, f_quantity);
-                //     }
-                // }
-                // "delete" => {
-                //     ask_tree.remove(&price_key(f_price));
-                // }
+                "change" => {
+                    if let Some(order) = ask_tree.get_mut(&OrderedFloat(f_price)) {
+                        *order = f_quantity;
+                    }
+                }
+                "delete" => {
+                    ask_tree.remove(&OrderedFloat(f_price));
+                }
                 _ => ()
             }
         }
