@@ -10,6 +10,8 @@ use serde_json::{Value, json};
 use tungstenite::client::AutoStream;
 use tungstenite::handshake::client::Response;
 use tungstenite::{WebSocket, Message};
+use tungstenite::protocol::CloseFrame;
+use tungstenite::protocol::frame::coding::CloseCode;
 // use std::thread;
 // use std::sync::{Arc, Mutex};
 mod models;
@@ -59,6 +61,32 @@ fn send_subscribe_msg(mut socket: WebSocket<AutoStream>) -> WebSocket<AutoStream
     let msg = tungstenite::Message::Text(json_data.to_string());
     let _ = socket.write_message(msg);
     socket
+}
+
+fn reconnect(mut socket: WebSocket<AutoStream>, mut parsed: BookStreamWrapper, mut lob: LimitOrderBook) -> (WebSocket<AutoStream>,BookStreamWrapper,LimitOrderBook) {
+    let close_frame = CloseFrame  {
+        code: CloseCode::Normal,
+        reason: Default::default(),
+    };
+    _ = socket.close(Some(close_frame));
+    (socket, _) = deribit_connect();
+    socket = send_subscribe_msg(socket);
+    (socket, _) = subscription_response(socket);
+    (socket, parsed) = read_subscription(socket);
+    lob.asks.clear();
+    lob.bids.clear();
+    (socket, parsed, lob)
+}
+
+fn check_id_status(mut change_id: i64 ,parsed: &BookStreamWrapper ) -> bool {
+    let id_check = change_id;
+    match parsed.params.data.prev_change_id {
+        id_check => {
+            change_id = parsed.params.data.change_id;
+            true
+        }
+        _ => false,
+    }
 }
 
 fn subscription_response(mut socket: WebSocket<AutoStream>) -> (WebSocket<AutoStream>, Message) {
@@ -137,7 +165,7 @@ fn resolve_deltas(mut lob: LimitOrderBook, parsed: &BookStreamWrapper) -> LimitO
 fn main() {
 
     let mut lob = LimitOrderBook::new();
-    // let mut change_id: i64;
+    let mut change_id: i64 = 0;
     let mut socket: WebSocket<AutoStream>;
     (socket, _) = deribit_connect();
     socket = send_subscribe_msg(socket);
@@ -146,13 +174,21 @@ fn main() {
         
     });
     loop {
-        let parsed: BookStreamWrapper;
+        let mut parsed: BookStreamWrapper;
         (socket, parsed) = read_subscription(socket);
+        // println!("{}", parsed.params.data.r#type);
         // TODO -----------------------------
         //  Check Reconnection
         //      -> renew connection
         //      -> clear lob
         // -----------------------------------
+        // socket = send_subscribe_msg(socket);
+        // (socket, parsed) = read_subscription(socket);
+        // (socket, _) = subscription_response(socket);
+        
+   
+
+
     //     let s_type = parsed.params.data.r#type;
     //    if let s_type.as_str() = "snapshot" {
     //        change_id = parsed.params.data.change_id;
@@ -169,6 +205,6 @@ fn main() {
         //  Print Prices 
         //  -> per second
         // -----------------------------------
-        print_lob(&lob);
+        // print_lob(&lob);
     }
 }
