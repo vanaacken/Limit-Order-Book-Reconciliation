@@ -16,11 +16,7 @@ use crate::connection::{deribit_connect,
     reconnect,
     read_subscription};
 
-
-
-
 fn main() {
-
     let mut socket: WebSocket<AutoStream>;
     let msg = Arc::new(Mutex::new(String::from("no data yet")));
     let set_msg = msg.clone();
@@ -34,7 +30,6 @@ fn main() {
             thread::sleep(time::Duration::from_millis(1000));
             let to_print = msg.lock().unwrap();
             println!("{}\n", to_print);
-            
         }
     });
 
@@ -43,11 +38,14 @@ fn main() {
     loop {
         let mut parsed: BookStreamWrapper;
         (socket, parsed) = read_subscription(socket);
+
         change_id = check_id_status(change_id, &parsed);
         if change_id == -1  {
             (socket, parsed, lob) = reconnect(socket, lob);
         }
+
         lob = resolve_deltas(lob, &parsed);
+        
         let mut set_msg = set_msg.lock().unwrap();
         *set_msg = format_best(&lob);
     }

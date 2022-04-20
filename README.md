@@ -5,29 +5,34 @@
 
 ## About The Project
 <p>
-I wrote a program that takes connects to the Deribit API and subscribes to the book.BTC-PERPETUAL.100ms. <br>
-The first snapshot of the limit order book and it's subsequents deltas are ordered in two binary tree maps. One holds the Price/Quanitity values of the asks in the book and the other for the bids.<br>
+This program connects to the Derebit Websocket API and subscribes to the book.BTC-PERPETUAL.100ms. <br>
+The first snapshot of the Limit Order Book and its subsequent deltas are ordered in two binary tree maps. One holds the Price/Quanitity values of the asks in the book and the other of the bids.<br>
 The Snapshot gives me the current state of the book.<br>
-The subsequent changes can change the Limit Order Book in 3 different ways: <br>
+The subsequent deltas can change the Limit Order Book in 3 different ways: <br>
 
-* New
+* **New**
     * Insert a new price level with the according quantity
-* Delete
+* **Delete**
     * Remove a price level from the Limit Order Book
-* Change 
+* **Change** 
     * Change the quantity of a price level
 
-The best bid/ask price are printed out each second with their according quantities.
+The best bid/ask price are printed out each second with their according quantities.<br>
+When the expected package isn't received, the program reconnects with the API and starts with a new snapshot.
 </p>
+<br>
 
 ### Built With Rust Crates
+<br>
 
 * [Tungstenite](https://docs.rs/tungstenite/latest/tungstenite/)
 * [Serde](https://docs.serde.rs/serde/index.html)
 * [Serde_json](https://docs.serde.rs/serde_json/macro.json.html)
 * [ordered-float](https://docs.rs/ordered-float/latest/ordered_float/)
+<br>
 
 ## Installation
+<br>
 
 1. Install rust
   ```sh
@@ -49,12 +54,31 @@ The best bid/ask price are printed out each second with their according quantiti
    ```sh
     cd lobr
    ```
-## Usage
 
+<br>
+
+## Usage
+<br>
 when in the root of the project run
+
 ```sh
 cargo run --release
 ```
+
+<br>
+
+## Example Output
+
+<img src="example.png" width="512"/>
+<br><br>
+
+## Future Improvements
+* Testing
+    * Unit Testing for the individual insert / deletes / changes in the Binary trees
+    * Testing the reconnection with an incorrect change_id
+
+<br><br>
+
 
 ## Contact
 
