@@ -1,19 +1,14 @@
-
-<div id="top"></div>
-
-
 # Limit Order Book Reconciliation
 
 ## D2X Technical Interview
 
-</div>
 
 ## About The Project
 <p>
 I wrote a program that takes connects to the Deribit API and subscribes to the book.BTC-PERPETUAL.100ms. <br>
 The first snapshot of the limit order book and it's subsequents deltas are ordered in two binary tree maps. One holds the Price/Quanitity values of the asks in the book and the other for the bids.<br>
 The Snapshot gives me the current state of the book.<br>
-The subsequent changes can change the Limit Order Book in 3 different ways <br>
+The subsequent changes can change the Limit Order Book in 3 different ways: <br>
 
 * New
     * Insert a new price level with the according quantity
@@ -65,17 +60,4 @@ cargo run --release
 
 Niels van Aacken - [@nielsvanaacken](https://www.linkedin.com/in/nielsvanaacken/) - nielsfhvanaacken@gmail.com
 
-Project Link: [https://github.com/vanaacken/lobr.git ](https://github.com/vanaacken/lobr.git )
-
-
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/othneildrew
-[product-screenshot]: images/screenshot.png
-
-
-
-
-
-
-
-
+Project Link: [https://github.com/vanaacken/Limit-Order-Book-Reconciliation ](https://github.com/vanaacken/Limit-Order-Book-Reconciliation )
