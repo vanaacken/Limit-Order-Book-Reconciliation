@@ -1,9 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use ordered_float::OrderedFloat;
-// use tungstenite::{WebSocket, Message};
-// use tungstenite::client::AutoStream;
-// use tungstenite::handshake::client::Response;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
@@ -15,7 +12,6 @@ pub enum Delta {
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct OrderBookDelta(pub String, pub f64, pub f64);
-
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
@@ -42,18 +38,6 @@ pub struct BookStreamWrapper {
     pub method: String,
     pub jsonrpc: String,
 }
-
-// #[derive(Debug, Clone, Copy)]
-// pub struct Key {
-//     pub key: OrderedFloat<f64>,
-// }
-
-// impl Key {
-//     pub fn new(price: f64) -> Self {
-//         let key = OrderedFloat(price)
-//         Key {key}
-//     }
-// }
 
 #[derive(Debug, Clone, Copy)]
 pub struct Order {
@@ -84,35 +68,28 @@ impl LimitOrderBook {
             best_bid: Order::new(0.0, 0.0),
         }
     }
-
-
     pub fn asks_new (mut self, order: Order) -> Self {
         self.asks.insert(OrderedFloat(order.price), order);
         self
     }
-
     pub fn asks_delete(mut self, order: Order) -> Self {
         self.asks.remove(&OrderedFloat(order.price));
         self
     }
-
     pub fn asks_change(mut self, order: Order) -> Self {
         if let Some(item) = self.asks.get_mut(&OrderedFloat(order.price)) {
             *item = order;
         }
         self
     }
-
     pub fn bids_new (mut self, order: Order) -> Self {
         self.bids.insert(OrderedFloat(order.price), order);
         self
     }
-
     pub fn bids_delete(mut self, order: Order) -> Self {
         self.bids.remove(&OrderedFloat(order.price));
         self
     }
-
     pub fn bids_change(mut self, order: Order) -> Self {
         if let Some(item) = self.bids.get_mut(&OrderedFloat(order.price)) {
             *item = order;
@@ -120,37 +97,3 @@ impl LimitOrderBook {
         self
     }
 }
-
-// #[derive(Debug, Copy, Clone)]
-// pub struct ChangeId{
-//     pub id: i64,
-//     pub prev_id: i64,
-// }
-
-// impl ChangeId {
-//     pub fn new()-> Self {
-//         let id = 0;
-//         let prev_id = 0;
-//         ChangeId{id, prev_id}
-//     }
-// }
-
-
-
-// #[derive(Debug, Clone)]
-// pub struct Connection {
-//     pub socket: WebSocket<AutoStream>,
-//     pub 
-// }
-
-
-
-
-
-
-
-
-
-
-
-

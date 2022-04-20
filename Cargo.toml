@@ -10,9 +10,4 @@ serde = {version = "1.0", features = ["derive"]}
 serde_json = "1"
 tungstenite = {version = "0.13", features = ["rustls-tls"], default-features = false}
 url = "2"
-float-cmp = "0.9.0"
-float-ord = "0.3.2"
 ordered-float = "2.10.0"
-[dev-dependencies]
-dotenv = "0.15"
-env_logger = "0.8"

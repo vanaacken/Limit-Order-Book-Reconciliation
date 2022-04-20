@@ -1,40 +1,29 @@
 
 use tungstenite::connect;
 use url::Url;
-// use std::collections::BTreeMap;
 use serde_json::{Value, json};
-// use float_cmp::ApproxEq;
-// use float_ord::FloatOrd;
-// use ordered_float::OrderedFloat;
-// use std::cmp::Ordering;
 use tungstenite::client::AutoStream;
 use tungstenite::handshake::client::Response;
 use tungstenite::{WebSocket, Message};
 use tungstenite::protocol::CloseFrame;
 use tungstenite::protocol::frame::coding::CloseCode;
-// use std::thread;
-// use std::sync::{Arc, Mutex};
+use std::{thread, time};
+use std::sync::{Mutex, Arc};
 mod models;
 use crate::models::Order;
 use crate::models::BookStreamWrapper;
 use crate::models::LimitOrderBook;
-// use crate::models::ChangeId;
-
-// use lobr::{print_map_values, price_key};
 
 pub static DERIBIT_WS_API: &str = "wss://www.deribit.com/ws/api/v2";
 pub static DERIBIT_WS_API_TESTNET: &str = "wss://test.deribit.com/ws/api/v2";
  
-fn print_lob(lob: &LimitOrderBook) {
+fn format_best(lob: &LimitOrderBook) -> String {
     let best_ask = lob.asks.iter().next().unwrap();    
-    println!(
-        "Best ask: {}, Quantity: {}",
+    let best_bid = lob.bids.iter().next_back().unwrap();
+    format!(
+        "Best ask: {}, Quantity: {}\nBest bid: {}, Quantity {}",
         best_ask.1.price,
         best_ask.1.qty,
-    );
-    let best_bid = lob.bids.iter().next_back().unwrap();
-    println!(
-        "Best bid: {}, Quantity{}",
         best_bid.1.price,
         best_bid.1.qty,
     )
@@ -63,7 +52,8 @@ fn send_subscribe_msg(mut socket: WebSocket<AutoStream>) -> WebSocket<AutoStream
     socket
 }
 
-fn reconnect(mut socket: WebSocket<AutoStream>, mut parsed: BookStreamWrapper, mut lob: LimitOrderBook) -> (WebSocket<AutoStream>,BookStreamWrapper,LimitOrderBook) {
+fn reconnect(mut socket: WebSocket<AutoStream>, mut lob: LimitOrderBook) -> (WebSocket<AutoStream>,BookStreamWrapper,LimitOrderBook) {
+    let parsed: BookStreamWrapper;
     let close_frame = CloseFrame  {
         code: CloseCode::Normal,
         reason: Default::default(),
@@ -78,14 +68,19 @@ fn reconnect(mut socket: WebSocket<AutoStream>, mut parsed: BookStreamWrapper, m
     (socket, parsed, lob)
 }
 
-fn check_id_status(mut change_id: i64 ,parsed: &BookStreamWrapper ) -> bool {
-    let id_check = change_id;
-    match parsed.params.data.prev_change_id {
-        id_check => {
-            change_id = parsed.params.data.change_id;
-            true
+fn check_id_status(change_id: i64 ,parsed: &BookStreamWrapper ) -> i64 {
+    match parsed.params.data.r#type.as_str() {
+        "snapshot" => {
+            parsed.params.data.change_id
         }
-        _ => false,
+        "change" => { 
+            if parsed.params.data.prev_change_id == Some(change_id) {
+                parsed.params.data.change_id
+            } else {
+                -1
+            }
+        }
+        _ => -1,
     }
 }
 
@@ -161,50 +156,36 @@ fn resolve_deltas(mut lob: LimitOrderBook, parsed: &BookStreamWrapper) -> LimitO
 }
 
 
-
 fn main() {
 
-    let mut lob = LimitOrderBook::new();
-    let mut change_id: i64 = 0;
     let mut socket: WebSocket<AutoStream>;
+    let msg = Arc::new(Mutex::new(String::from("no data yet")));
+    let set_msg = msg.clone();
+    
     (socket, _) = deribit_connect();
     socket = send_subscribe_msg(socket);
     (socket, _) = subscription_response(socket);
-    let _ = std::thread::spawn(|| {
-        
+
+    std::thread::spawn(move || {
+        loop {
+            thread::sleep(time::Duration::from_millis(1000));
+            let to_print = msg.lock().unwrap();
+            println!("{}\n", to_print);
+            
+        }
     });
+
+    let mut lob = LimitOrderBook::new();
+    let mut change_id: i64 = 0;
     loop {
         let mut parsed: BookStreamWrapper;
         (socket, parsed) = read_subscription(socket);
-        // println!("{}", parsed.params.data.r#type);
-        // TODO -----------------------------
-        //  Check Reconnection
-        //      -> renew connection
-        //      -> clear lob
-        // -----------------------------------
-        // socket = send_subscribe_msg(socket);
-        // (socket, parsed) = read_subscription(socket);
-        // (socket, _) = subscription_response(socket);
-        
-   
-
-
-    //     let s_type = parsed.params.data.r#type;
-    //    if let s_type.as_str() = "snapshot" {
-    //        change_id = parsed.params.data.change_id;
-    //    }
-
-
+        change_id = check_id_status(change_id, &parsed);
+        if change_id == -1  {
+            (socket, parsed, lob) = reconnect(socket, lob);
+        }
         lob = resolve_deltas(lob, &parsed);
-        // TODO -----------------------------
-        //  find best bid/ask
-        // -----------------------------------
-        // println!("{}", parsed.params.data.timestamp);
-
-        // TODO -----------------------------
-        //  Print Prices 
-        //  -> per second
-        // -----------------------------------
-        // print_lob(&lob);
+        let mut set_msg = set_msg.lock().unwrap();
+        *set_msg = format_best(&lob);
     }
 }
