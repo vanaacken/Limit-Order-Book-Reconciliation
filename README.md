@@ -6,18 +6,19 @@
 ## About The Project
 <p>
 This program connects to the Derebit Websocket API and subscribes to the book.BTC-PERPETUAL.100ms. <br>
-The first snapshot of the Limit Order Book and its subsequent deltas are ordered in two binary tree maps. One holds the Price/Quanitity values of the asks in the book and the other of the bids.<br>
-The Snapshot gives me the current state of the book.<br>
+The first snapshot of the Limit Order Book and its subsequent deltas are ordered in two binary tree maps.<br>
+ These hold the Price/Quanitity values of the asks and the bids.<br>
+The Snapshot gives the current state of the book.<br>
 The subsequent deltas can change the Limit Order Book in 3 different ways: <br>
 
 * **New**
-    * Insert a new price level with the according quantity
+    * Insert a new price level with the corresponding quantity
 * **Delete**
     * Remove a price level from the Limit Order Book
 * **Change** 
     * Change the quantity of a price level
 
-The best bid/ask price are printed out each second with their according quantities.<br>
+The best bid/ask price is printed out each second with the corresponding quantities.<br>
 When the expected package isn't received, the program reconnects with the API and starts with a new snapshot.
 </p>
 <br>
